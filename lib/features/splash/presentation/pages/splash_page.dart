@@ -128,7 +128,6 @@ class _ArcPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..shader = SweepGradient(
         colors: [
-          // AppColors.matteRed.withValues(alpha: 0),
           AppColors.matteRed.withOpacity(0),
           AppColors.matteRed,
         ],

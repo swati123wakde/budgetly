@@ -24,7 +24,6 @@ class DollarLogo extends StatelessWidget {
         boxShadow: [
           if (glow > 0)
             BoxShadow(
-              // color: AppColors.matteRed.withValues(alpha: 0.35 * glow),
               color: AppColors.matteRed.withOpacity(0.35 * glow),
               blurRadius: size * 0.6,
               spreadRadius: size * 0.05,
@@ -33,6 +32,7 @@ class DollarLogo extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
+
         r'$',
         style: GoogleFonts.spaceGrotesk(
           fontSize: size * 0.55,

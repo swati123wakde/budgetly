@@ -8,6 +8,7 @@ class HomeRepositoryImpl implements HomeRepository {
   const HomeRepositoryImpl(this._dataSource);
   final HomeDataSource _dataSource;
 
+
   @override
   Future<Result<BudgetSummary>> getSummary() async {
     try {
