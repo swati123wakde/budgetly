@@ -35,6 +35,7 @@ class GetStartedCubit extends Cubit<GetStartedState> {
   void select(TrackingMode mode) => emit(state.copyWith(selected: mode));
 
   Future<void> submit() async {
+
     final mode = state.selected;
     if (mode == null) return;
     emit(state.copyWith(isSubmitting: true));

@@ -11,6 +11,7 @@ class HomeDataSourceImpl implements HomeDataSource {
     await Future<void>.delayed(const Duration(milliseconds: 1400));
     return const BudgetSummary(
       balance: 4820.50,
+
       monthlyBudget: 2480,
       spent: 1537.60,
       recent: [
