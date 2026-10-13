@@ -3,6 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/auth/presentation/cubit/login_cubit.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/budget_setup/domain/entities/budget_cycle.dart';
+import '../../features/budget_setup/domain/entities/transaction_category.dart';
+import '../../features/budget_setup/presentation/cubit/budget_cycle_cubit.dart';
+import '../../features/budget_setup/presentation/cubit/category_picker_cubit.dart';
+import '../../features/budget_setup/presentation/cubit/first_transaction_cubit.dart';
+import '../../features/budget_setup/presentation/pages/budget_cycle_page.dart';
+import '../../features/budget_setup/presentation/pages/budget_setup_loading_page.dart';
+import '../../features/budget_setup/presentation/pages/category_picker_page.dart';
+import '../../features/budget_setup/presentation/pages/first_transaction_page.dart';
 import '../../features/get_started/domain/entities/tracking_option.dart';
 import '../../features/get_started/presentation/cubit/get_started_cubit.dart';
 import '../../features/get_started/presentation/pages/get_started_page.dart';
@@ -28,6 +37,29 @@ abstract final class AppRouter {
         BlocProvider(
           create: (_) => sl<GetStartedCubit>()..loadOptions(),
           child: const GetStartedPage(),
+        ),
+      ),
+      AppRoutes.budgetCycle => _page(
+        settings,
+        BlocProvider(create: (_) => sl<BudgetCycleCubit>(), child: const BudgetCyclePage()),
+      ),
+      AppRoutes.budgetSetupLoading => _fade(
+        settings,
+        BudgetSetupLoadingPage(cycle: settings.arguments as BudgetCycle? ?? BudgetCycle.monthly),
+      ),
+      AppRoutes.firstTransaction => _fade(
+        settings,
+        BlocProvider(
+          create: (_) => sl<FirstTransactionCubit>(),
+          child: const FirstTransactionPage(),
+        ),
+      ),
+      AppRoutes.categoryPicker => MaterialPageRoute<TransactionCategory>(
+        settings: settings,
+        builder: (_) => BlocProvider(
+          create: (_) => sl<CategoryPickerCubit>()
+            ..load(selectedId: (settings.arguments as TransactionCategory?)?.id),
+          child: const CategoryPickerPage(),
         ),
       ),
       AppRoutes.login => _page(
