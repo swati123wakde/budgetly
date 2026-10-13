@@ -16,10 +16,39 @@ abstract final class AppStrings {
   static const String logIn = 'Log in';
 
   // Get started
-  static const String getStartedOverline = 'STEP 1 OF 2';
+  static const String getStartedOverline = 'STEP 1 OF 3';
   static const String getStartedTitle = 'How would you like\nto get started?';
   static const String getStartedSubtitle = 'Pick one for now — you can switch any time in settings.';
   static const String continueText = 'Continue';
+
+  // Budget cycle
+  static const String budgetCycleTitle = 'How would you like\nto budget?';
+  static const String budgetCycleSubtitle = 'Most people match this to their pay cycle.';
+
+  // Budget setup loader
+  static String setupLoadingTitle(String cycleLabel) =>
+      'Setting up your ${cycleLabel.toLowerCase()} budget';
+  static const String setupLoadingSubtitle = 'Creating your categories…';
+
+  // First transaction
+  static const String firstTransactionTitle = 'Log your first\ntransaction';
+  static const String firstTransactionSubtitle = 'Anything recent. Coffee, groceries, petrol.';
+  static const String earnXp = 'Earn 45 XP';
+  static const String amount = 'Amount';
+  static const String category = 'Category';
+  static const String chooseCategory = 'Choose a category';
+  static const String save = 'Save';
+  static const String skip = 'Skip';
+  static const String transactionSaved = 'Transaction saved · +45 XP';
+
+  // Category picker
+  static const String categoryHint = "Can't find a category that fits?\nCreate a new one.";
+  static const String newCategory = 'New category';
+  static const String categoryName = 'Category name';
+  static const String categoryNameHint = 'e.g. Pet care';
+  static const String addCategory = 'Add category';
+  static const String sortAtoZ = 'Sort A to Z';
+  static const String sortZtoA = 'Sort Z to A';
 
   // Login
   static const String loginTitle = 'Welcome back';

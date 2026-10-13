@@ -8,6 +8,7 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../../domain/entities/tracking_option.dart';
 import '../cubit/get_started_cubit.dart';
 import '../widgets/tracking_option_card.dart';
 import '../widgets/tracking_option_shimmer.dart';
@@ -21,7 +22,10 @@ class GetStartedPage extends StatelessWidget {
       listenWhen: (prev, curr) =>
       prev.completedMode != curr.completedMode || prev.errorMessage != curr.errorMessage,
       listener: (context, state) {
-        if (state.completedMode != null) {
+        if (state.completedMode == TrackingMode.spendingOnly) {
+          // First option continues into budget setup.
+          Navigator.of(context).pushNamed(AppRoutes.budgetCycle);
+        } else if (state.completedMode != null) {
           Navigator.of(context).pushNamedAndRemoveUntil(
             AppRoutes.home,
                 (_) => false,
@@ -106,7 +110,7 @@ class _Header extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.pill),
             child: const LinearProgressIndicator(
-              value: 0.5,
+              value: 1 / 3,
               minHeight: 4,
               backgroundColor: AppColors.surfaceHigh,
               color: AppColors.matteRed,

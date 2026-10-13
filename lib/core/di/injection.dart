@@ -6,6 +6,16 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_with_email.dart';
 import '../../features/auth/domain/usecases/login_with_google.dart';
 import '../../features/auth/presentation/cubit/login_cubit.dart';
+import '../../features/budget_setup/data/datasources/budget_setup_local_data_source.dart';
+import '../../features/budget_setup/data/repositories/budget_setup_repository_impl.dart';
+import '../../features/budget_setup/domain/repositories/budget_setup_repository.dart';
+import '../../features/budget_setup/domain/usecases/create_category.dart';
+import '../../features/budget_setup/domain/usecases/get_categories.dart';
+import '../../features/budget_setup/domain/usecases/save_budget_cycle.dart';
+import '../../features/budget_setup/domain/usecases/save_transaction.dart';
+import '../../features/budget_setup/presentation/cubit/budget_cycle_cubit.dart';
+import '../../features/budget_setup/presentation/cubit/category_picker_cubit.dart';
+import '../../features/budget_setup/presentation/cubit/first_transaction_cubit.dart';
 import '../../features/get_started/data/datasources/tracking_option_local_data_source.dart';
 import '../../features/get_started/data/repositories/tracking_option_repository_impl.dart';
 import '../../features/get_started/domain/repositories/tracking_option_repository.dart';
@@ -44,6 +54,20 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => SaveTrackingMode(sl()))
     ..registerFactory(
           () => GetStartedCubit(getTrackingOptions: sl(), saveTrackingMode: sl()),
+    );
+
+  // ---------- Budget setup ----------
+  sl
+    ..registerLazySingleton<BudgetSetupLocalDataSource>(BudgetSetupLocalDataSourceImpl.new)
+    ..registerLazySingleton<BudgetSetupRepository>(() => BudgetSetupRepositoryImpl(sl()))
+    ..registerLazySingleton(() => SaveBudgetCycle(sl()))
+    ..registerLazySingleton(() => GetCategories(sl()))
+    ..registerLazySingleton(() => CreateCategory(sl()))
+    ..registerLazySingleton(() => SaveTransaction(sl()))
+    ..registerFactory(() => BudgetCycleCubit(sl()))
+    ..registerFactory(() => FirstTransactionCubit(sl()))
+    ..registerFactory(
+          () => CategoryPickerCubit(getCategories: sl(), createCategory: sl()),
     );
 
   // ---------- Home ----------
