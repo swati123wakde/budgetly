@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_dimens.dart';
-import '../theme/app_text_styles.dart';
 import 'app_back_button.dart';
 
-/// Onboarding header: back button, "STEP x OF y" overline and a thin progress bar.
+/// Onboarding header: back button, centred step dashes, optional trailing action.
 class StepHeader extends StatelessWidget {
   const StepHeader({
     super.key,
@@ -26,33 +25,36 @@ class StepHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 44,
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          if (showBack) const AppBackButton(),
-          const Spacer(),
-          Text('STEP $step OF $totalSteps', style: AppTextStyles.overline),
-          const SizedBox(width: AppSpacing.sm),
-          SizedBox(
-            width: 56,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: (step - 1) / totalSteps, end: step / totalSteps),
-                duration: AppDurations.slow,
-                curve: Curves.easeOutCubic,
-                builder: (_, value, __) => LinearProgressIndicator(
-                  value: value,
-                  minHeight: 4,
-                  backgroundColor: AppColors.surfaceHigh,
-                  color: AppColors.matteRed,
-                ),
-              ),
+          Semantics(
+            label: 'Step $step of $totalSteps',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var i = 1; i <= totalSteps; i++) ...[
+                  if (i > 1) const SizedBox(width: 6),
+                  AnimatedContainer(
+                    duration: AppDurations.medium,
+                    curve: Curves.easeOutCubic,
+                    width: i == step ? 34 : 18,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: i == step
+                          ? AppColors.matteRed
+                          : i < step
+                          ? AppColors.matteRedDark
+                          : AppColors.surfaceHigh,
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          if (trailing != null) ...[
-            const SizedBox(width: AppSpacing.xs),
-            trailing!,
-          ],
+          if (showBack) const Align(alignment: Alignment.centerLeft, child: AppBackButton()),
+          if (trailing != null) Align(alignment: Alignment.centerRight, child: trailing),
         ],
       ),
     );

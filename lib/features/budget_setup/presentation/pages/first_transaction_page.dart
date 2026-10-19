@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +9,6 @@ import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/step_header.dart';
-import '../../../get_started/domain/entities/tracking_option.dart';
 import '../../domain/entities/transaction_category.dart';
 import '../cubit/first_transaction_cubit.dart';
 import '../widgets/category_icon.dart';
@@ -21,11 +19,7 @@ class FirstTransactionPage extends StatelessWidget {
   const FirstTransactionPage({super.key});
 
   void _goHome(BuildContext context) {
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      AppRoutes.home,
-          (_) => false,
-      arguments: TrackingMode.spendingOnly,
-    );
+    Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.home, (_) => false);
   }
 
   Future<void> _pickCategory(BuildContext context) async {
@@ -63,8 +57,8 @@ class FirstTransactionPage extends StatelessWidget {
                 children: [
                   const SizedBox(height: AppSpacing.md),
                   StepHeader(
-                    step: 3,
-                    totalSteps: 3,
+                    step: 4,
+                    totalSteps: 4,
                     trailing: TextButton(
                       onPressed: () => _goHome(context),
                       child: const Text(AppStrings.skip),

@@ -1,28 +1,36 @@
 part of 'home_cubit.dart';
 
-sealed class HomeState extends Equatable {
-  const HomeState();
+enum HomeStatus { loading, loaded, failure }
+
+class HomeState extends Equatable {
+  const HomeState({
+    this.status = HomeStatus.loading,
+    this.overview,
+    this.customRange,
+    this.errorMessage,
+  });
+
+  final HomeStatus status;
+
+  /// Kept while reloading so the screen doesn't flash back to a skeleton.
+  final HomeOverview? overview;
+  final DateSpan? customRange;
+  final String? errorMessage;
+
+  HomeState copyWith({
+    HomeStatus? status,
+    HomeOverview? overview,
+    DateSpan? Function()? customRange,
+    String? errorMessage,
+  }) {
+    return HomeState(
+      status: status ?? this.status,
+      overview: overview ?? this.overview,
+      customRange: customRange != null ? customRange() : this.customRange,
+      errorMessage: errorMessage,
+    );
+  }
 
   @override
-  List<Object?> get props => [];
-}
-
-final class HomeLoading extends HomeState {
-  const HomeLoading();
-}
-
-final class HomeLoaded extends HomeState {
-  const HomeLoaded(this.summary);
-  final BudgetSummary summary;
-
-  @override
-  List<Object?> get props => [summary];
-}
-
-final class HomeError extends HomeState {
-  const HomeError(this.message);
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [status, overview, customRange, errorMessage];
 }

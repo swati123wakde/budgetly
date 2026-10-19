@@ -96,6 +96,19 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1),
+      // Used by the payday date picker and the home date-range picker.
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        headerBackgroundColor: AppColors.surfaceElevated,
+        headerForegroundColor: AppColors.textPrimary,
+        rangePickerBackgroundColor: AppColors.background,
+        rangePickerSurfaceTintColor: Colors.transparent,
+        rangePickerHeaderBackgroundColor: AppColors.surface,
+        rangePickerHeaderForegroundColor: AppColors.textPrimary,
+        rangeSelectionBackgroundColor: AppColors.matteRedTint,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: CupertinoPageTransitionsBuilder(),

@@ -20,6 +20,10 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<Result<UserEntity>> loginWithGoogle() async => const Ok<UserEntity>(user);
+
+  @override
+  Future<Result<UserEntity>> registerWithEmail({required String email, required String password}) async =>
+      fail ? const Err<UserEntity>(AuthFailure('Taken')) : const Ok<UserEntity>(user);
 }
 
 LoginCubit _cubit({bool fail = false}) {

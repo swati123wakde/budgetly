@@ -6,8 +6,8 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../../../../core/widgets/step_header.dart';
 import '../../domain/entities/tracking_option.dart';
 import '../cubit/get_started_cubit.dart';
 import '../widgets/tracking_option_card.dart';
@@ -43,7 +43,7 @@ class GetStartedPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: AppSpacing.md),
-                const _Header(),
+                const StepHeader(step: 1, totalSteps: 4),
                 const SizedBox(height: AppSpacing.xl),
                 Text(AppStrings.getStartedTitle, style: AppTextStyles.headlineLarge),
                 const SizedBox(height: AppSpacing.sm),
@@ -90,34 +90,6 @@ class GetStartedPage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const AppBackButton(),
-        const Spacer(),
-        Text(AppStrings.getStartedOverline, style: AppTextStyles.overline),
-        const SizedBox(width: AppSpacing.sm),
-        SizedBox(
-          width: 56,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: const LinearProgressIndicator(
-              value: 1 / 3,
-              minHeight: 4,
-              backgroundColor: AppColors.surfaceHigh,
-              color: AppColors.matteRed,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

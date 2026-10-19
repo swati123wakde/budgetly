@@ -16,6 +16,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Result<UserEntity>> loginWithGoogle() => _guard(_remote.loginWithGoogle);
 
+  @override
+  Future<Result<UserEntity>> registerWithEmail({required String email, required String password}) =>
+      _guard(() => _remote.registerWithEmail(email: email, password: password));
+
   Future<Result<UserEntity>> _guard(Future<UserEntity> Function() call) async {
     try {
       return Ok<UserEntity>(await call());

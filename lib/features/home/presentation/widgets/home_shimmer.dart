@@ -13,6 +13,23 @@ class HomeShimmer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Row(
+            children: [
+              ShimmerBox(width: 52, height: 52, shape: BoxShape.circle),
+              SizedBox(width: AppSpacing.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ShimmerBox(width: 110, height: 18),
+                  SizedBox(height: 8),
+                  ShimmerBox(width: 170, height: 12),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          const ShimmerBox(height: 90, radius: AppRadius.lg),
+          const SizedBox(height: AppSpacing.md),
           const ShimmerBox(height: 170, radius: AppRadius.lg),
           const SizedBox(height: AppSpacing.lg),
           const ShimmerBox(width: 140, height: 18),

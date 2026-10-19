@@ -1,19 +1,24 @@
 import '../../../../core/error/exceptions.dart';
-import '../../domain/entities/budget_cycle.dart';
+import '../../domain/entities/budget_plan.dart';
 import '../../domain/entities/new_transaction.dart';
 import '../models/transaction_category_model.dart';
 
 abstract interface class BudgetSetupLocalDataSource {
-  Future<void> saveBudgetCycle(BudgetCycle cycle);
+  Future<void> saveBudgetPlan(BudgetPlan plan);
+
+  /// Falls back to a monthly plan if onboarding was skipped.
+  Future<BudgetPlan> getBudgetPlan();
+  Future<List<NewTransaction>> getTransactions();
   Future<List<TransactionCategoryModel>> getCategories();
   Future<TransactionCategoryModel> createCategory(String name);
   Future<void> saveTransaction(NewTransaction transaction);
 }
 
-/// In-memory implementation. Swap for SharedPreferences / a database later
-/// without touching domain or presentation code.
+/// In-memory implementation shared by onboarding, home and profile.
+/// Swap for SharedPreferences / a database later without touching
+/// domain or presentation code.
 class BudgetSetupLocalDataSourceImpl implements BudgetSetupLocalDataSource {
-  BudgetCycle? _cycle;
+  BudgetPlan? _plan;
   final List<NewTransaction> _transactions = [];
 
   final List<TransactionCategoryModel> _categories = _defaults
@@ -30,13 +35,19 @@ class BudgetSetupLocalDataSourceImpl implements BudgetSetupLocalDataSource {
     {'id': 'utilities', 'name': 'Utilities', 'iconKey': 'utilities'},
   ];
 
-  BudgetCycle? get budgetCycle => _cycle;
+  BudgetPlan? get budgetPlan => _plan;
   List<NewTransaction> get transactions => List.unmodifiable(_transactions);
 
   @override
-  Future<void> saveBudgetCycle(BudgetCycle cycle) async {
-    _cycle = cycle;
+  Future<void> saveBudgetPlan(BudgetPlan plan) async {
+    _plan = plan;
   }
+
+  @override
+  Future<BudgetPlan> getBudgetPlan() async => _plan ?? BudgetPlan.monthly();
+
+  @override
+  Future<List<NewTransaction>> getTransactions() async => List.of(_transactions);
 
   @override
   Future<List<TransactionCategoryModel>> getCategories() async {

@@ -13,4 +13,10 @@ abstract final class Validators {
     if (value.length < 6) return 'Use at least 6 characters';
     return null;
   }
+
+  static String? confirmPassword(String password, String confirm) {
+    if (confirm.isEmpty) return 'Please confirm your password';
+    if (confirm != password) return "Passwords don't match";
+    return null;
+  }
 }
