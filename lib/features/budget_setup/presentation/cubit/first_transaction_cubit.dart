@@ -22,7 +22,12 @@ class FirstTransactionCubit extends Cubit<FirstTransactionState> {
     if (!state.canSave) return;
     emit(state.copyWith(isSaving: true));
     final result = await _saveTransaction(
-      NewTransaction(type: state.type, amount: state.amount, category: state.category!),
+      NewTransaction(
+        type: state.type,
+        amount: state.amount,
+        category: state.category!,
+        date: DateTime.now(),
+      ),
     );
     if (isClosed) return;
     result.fold(

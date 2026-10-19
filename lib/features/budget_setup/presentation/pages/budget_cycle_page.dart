@@ -19,10 +19,16 @@ class BudgetCyclePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<BudgetCycleCubit, BudgetCycleState>(
       listenWhen: (prev, curr) =>
-      prev.completedCycle != curr.completedCycle || prev.errorMessage != curr.errorMessage,
+      prev.completedCycle != curr.completedCycle ||
+          prev.paydayCycle != curr.paydayCycle ||
+          prev.errorMessage != curr.errorMessage,
       listener: (context, state) {
         if (state.completedCycle != null) {
+          // Monthly: straight to the setup loader.
           Navigator.of(context).pushNamed(AppRoutes.budgetSetupLoading, arguments: state.completedCycle);
+        } else if (state.paydayCycle != null) {
+          // Fortnightly / weekly: ask for the payday first.
+          Navigator.of(context).pushNamed(AppRoutes.payday, arguments: state.paydayCycle);
         } else if (state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
         }
@@ -35,7 +41,7 @@ class BudgetCyclePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: AppSpacing.md),
-                const StepHeader(step: 2, totalSteps: 3),
+                const StepHeader(step: 2, totalSteps: 4),
                 const SizedBox(height: AppSpacing.xl),
                 Text(AppStrings.budgetCycleTitle, style: AppTextStyles.headlineLarge),
                 const SizedBox(height: AppSpacing.sm),

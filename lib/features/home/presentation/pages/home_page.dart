@@ -2,66 +2,85 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/utils/currency_formatter.dart';
-import '../../../../core/widgets/dollar_logo.dart';
-import '../../../get_started/domain/entities/tracking_option.dart';
-import '../../domain/entites/budget_summary.dart';
+import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/date_span.dart';
+import '../../domain/entites/home_overview.dart';
 import '../cubit/home_cubit.dart';
+import '../widgets/challenge_card.dart';
+import '../widgets/expense_row.dart';
+import '../widgets/forecast_card.dart';
+import '../widgets/home_header.dart';
 import '../widgets/home_shimmer.dart';
+import '../widgets/period_label.dart';
+import 'all_expenses_page.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key, this.mode});
+/// Main screen after onboarding: Home tab plus three placeholder tabs.
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
-  /// Set when the user arrives from the "get started" flow.
-  final TrackingMode? mode;
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _tab = 0;
+
+  static const _destinations = [
+    (Icons.home_outlined, Icons.home_rounded, AppStrings.tabHome),
+    (Icons.calendar_month_outlined, Icons.calendar_month_rounded, AppStrings.tabCalendar),
+    (Icons.speed_outlined, Icons.speed_rounded, AppStrings.tabBudget),
+    (Icons.bar_chart_outlined, Icons.bar_chart_rounded, AppStrings.tabReports),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: RefreshIndicator(
-          color: AppColors.matteRed,
-          backgroundColor: AppColors.surface,
-          onRefresh: context.read<HomeCubit>().load,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(AppSpacing.screenPadding),
-            children: [
-              Row(
-                children: [
-                  const DollarLogo(size: 40),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(AppStrings.homeGreeting, style: AppTextStyles.bodySmall),
-                        Text(AppStrings.appName, style: AppTextStyles.titleLarge),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.notifications_none_rounded),
-                  ),
-                ],
+        bottom: false,
+        child: IndexedStack(
+          index: _tab,
+          children: [
+            const _HomeTab(),
+            for (final d in _destinations.skip(1)) _ComingSoonTab(icon: d.$2, title: d.$3),
+          ],
+        ),
+      ),
+      floatingActionButton: _tab == 0 ? const _AddButton() : null,
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            backgroundColor: AppColors.surface,
+            surfaceTintColor: Colors.transparent,
+            indicatorColor: AppColors.matteRedTint,
+            height: 68,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+            iconTheme: WidgetStateProperty.resolveWith(
+                  (states) => IconThemeData(
+                size: 26,
+                color: states.contains(WidgetState.selected)
+                    ? AppColors.matteRedLight
+                    : AppColors.textMuted,
               ),
-              const SizedBox(height: AppSpacing.lg),
-              BlocBuilder<HomeCubit, HomeState>(
-                builder: (context, state) => AnimatedSwitcher(
-                  duration: AppDurations.medium,
-                  child: switch (state) {
-                    HomeLoading() => const HomeShimmer(),
-                    HomeError(:final message) => Center(
-                      child: Text(message, style: AppTextStyles.bodyMedium),
-                    ),
-                    HomeLoaded(:final summary) => _Content(summary: summary, mode: mode),
-                  },
+            ),
+          ),
+          child: NavigationBar(
+            selectedIndex: _tab,
+            onDestinationSelected: (i) => setState(() => _tab = i),
+            destinations: [
+              for (final d in _destinations)
+                NavigationDestination(
+                  icon: Icon(d.$1),
+                  selectedIcon: Icon(d.$2),
+                  label: d.$3,
+                  tooltip: d.$3,
                 ),
-              ),
             ],
           ),
         ),
@@ -70,140 +89,218 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class _Content extends StatelessWidget {
-  const _Content({required this.summary, this.mode});
+/// The "+" button is shown but not wired up yet.
+class _AddButton extends StatelessWidget {
+  const _AddButton();
 
-  final BudgetSummary summary;
-  final TrackingMode? mode;
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: null,
+      backgroundColor: AppColors.matteRed,
+      foregroundColor: AppColors.onRed,
+      elevation: 0,
+      disabledElevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+      child: const Icon(Icons.add_rounded, size: 30),
+    );
+  }
+}
+
+class _HomeTab extends StatelessWidget {
+  const _HomeTab();
+
+  Future<void> _pickRange(BuildContext context, DateSpan current) async {
+    final cubit = context.read<HomeCubit>();
+    final today = dateOnly(DateTime.now());
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(today.year - 2),
+      lastDate: DateTime(today.year + 1, 12, 31),
+      initialDateRange: DateTimeRange(start: current.start, end: current.end),
+      helpText: AppStrings.rangePickerHelp,
+      saveText: AppStrings.apply,
+    );
+    if (picked != null) await cubit.selectRange(DateSpan(picked.start, picked.end));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        final overview = state.overview;
+
+        if (overview == null) {
+          return Padding(
+            padding: const EdgeInsets.all(AppSpacing.screenPadding),
+            child: state.status == HomeStatus.failure
+                ? _ErrorView(
+              message: state.errorMessage ?? '',
+              onRetry: context.read<HomeCubit>().load,
+            )
+                : const HomeShimmer(),
+          );
+        }
+
+        return RefreshIndicator(
+          color: AppColors.matteRed,
+          backgroundColor: AppColors.surface,
+          onRefresh: context.read<HomeCubit>().load,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            // Bottom space keeps the last row clear of the + button.
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenPadding, AppSpacing.md, AppSpacing.screenPadding, 110,
+            ),
+            children: [
+              HomeHeader(
+                title: periodTitle(overview),
+                rangeText: DateFormatter.span(overview.period),
+                onAvatarTap: () => Navigator.of(context).pushNamed(AppRoutes.profile),
+                onRangeTap: () => _pickRange(context, overview.period),
+              ),
+              if (overview.isCustomRange)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: context.read<HomeCubit>().resetRange,
+                    icon: const Icon(Icons.restart_alt_rounded, size: 18),
+                    label: const Text(AppStrings.backToCurrentPeriod),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              if (overview.hasAnyTransactions) ...[
+                const ChallengeCard(),
+                const SizedBox(height: AppSpacing.md),
+              ],
+              AnimatedOpacity(
+                opacity: state.status == HomeStatus.loading ? 0.5 : 1,
+                duration: AppDurations.fast,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ForecastCard(
+                      forecast: overview.forecast,
+                      expenses: overview.expenseTotal,
+                      income: overview.incomeTotal,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _ExpensesSection(overview: overview),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ExpensesSection extends StatelessWidget {
+  const _ExpensesSection({required this.overview});
+
+  final HomeOverview overview;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _BalanceCard(summary: summary, mode: mode),
-        const SizedBox(height: AppSpacing.lg),
-        Text('Recent activity', style: AppTextStyles.titleMedium),
-        const SizedBox(height: AppSpacing.sm),
-        ...summary.recent.map((t) => _TransactionTile(transaction: t)),
+        Row(
+          children: [
+            Text(AppStrings.expenses, style: AppTextStyles.titleLarge),
+            const Spacer(),
+            TextButton(
+              onPressed: () => Navigator.of(context).pushNamed(
+                AppRoutes.allExpenses,
+                arguments: AllExpensesArgs(
+                  title: periodTitle(overview),
+                  period: overview.period,
+                  expenses: overview.expenses,
+                ),
+              ),
+              child: Text(
+                AppStrings.viewAll,
+                style: AppTextStyles.label.copyWith(color: AppColors.textPrimary),
+              ),
+            ),
+          ],
+        ),
+        const Divider(height: AppSpacing.md),
+        if (overview.expensesByCategory.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            child: Text(
+              AppStrings.noExpensesYet,
+              style: AppTextStyles.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          for (final c in overview.expensesByCategory) ...[
+            ExpenseRow(
+              category: c.category,
+              amount: c.total,
+              subtitle: AppStrings.transactionCount(c.count),
+            ),
+            const Divider(height: 1),
+          ],
       ],
     );
   }
 }
 
-class _BalanceCard extends StatelessWidget {
-  const _BalanceCard({required this.summary, this.mode});
+class _ComingSoonTab extends StatelessWidget {
+  const _ComingSoonTab({required this.icon, required this.title});
 
-  final BudgetSummary summary;
-  final TrackingMode? mode;
+  final IconData icon;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg - 4),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(AppStrings.totalBalance, style: AppTextStyles.bodyMedium),
-              const Spacer(),
-              if (mode != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.matteRedTint,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  child: Text(
-                    mode == TrackingMode.spendingOnly ? 'Spending' : 'Spending + accounts',
-                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.matteRedLight),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(CurrencyFormatter.format(summary.balance), style: AppTextStyles.displayLarge),
-          const SizedBox(height: AppSpacing.lg),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: LinearProgressIndicator(
-              value: summary.spentRatio,
-              minHeight: 8,
-              backgroundColor: AppColors.surfaceHigh,
-              color: AppColors.matteRed,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.screenPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+              child: Icon(icon, size: 34, color: AppColors.textSecondary),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Text(
-                '${CurrencyFormatter.format(summary.spent)} spent',
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-              ),
-              const Spacer(),
-              Text(
-                'of ${CurrencyFormatter.format(summary.monthlyBudget)}',
-                style: AppTextStyles.bodySmall,
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(height: AppSpacing.md),
+            Text(title, style: AppTextStyles.headlineMedium),
+            const SizedBox(height: AppSpacing.xs),
+            Text(AppStrings.comingSoon, style: AppTextStyles.bodyMedium),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _TransactionTile extends StatelessWidget {
-  const _TransactionTile({required this.transaction});
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.message, required this.onRetry});
 
-  final Transaction transaction;
-
-  IconData get _icon => switch (transaction.category) {
-    'Food' => Icons.restaurant_rounded,
-    'Transport' => Icons.directions_transit_rounded,
-    'Income' => Icons.south_west_rounded,
-    _ => Icons.receipt_rounded,
-  };
+  final String message;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final isIncome = transaction.amount > 0;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Row(
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceElevated,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Icon(_icon, size: 20, color: AppColors.textSecondary),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(transaction.title, style: AppTextStyles.titleMedium.copyWith(fontSize: 15)),
-                Text(transaction.category, style: AppTextStyles.bodySmall),
-              ],
-            ),
-          ),
-          Text(
-            CurrencyFormatter.format(transaction.amount, showSign: true),
-            style: AppTextStyles.titleMedium.copyWith(
-              fontSize: 15,
-              color: isIncome ? AppColors.success : AppColors.textPrimary,
-            ),
-          ),
+          const Icon(Icons.cloud_off_rounded, color: AppColors.textMuted, size: 40),
+          const SizedBox(height: AppSpacing.sm),
+          Text(message, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
+          TextButton(onPressed: onRetry, child: const Text('Try again')),
         ],
       ),
     );

@@ -1,25 +1,24 @@
-import '../../domain/entites/budget_summary.dart';
+import '../../../budget_setup/data/datasources/budget_setup_local_data_source.dart';
+import '../../../budget_setup/domain/entities/budget_plan.dart';
+import '../../../budget_setup/domain/entities/new_transaction.dart';
 
 abstract interface class HomeDataSource {
-  Future<BudgetSummary> getSummary();
+  Future<BudgetPlan> getBudgetPlan();
+  Future<List<NewTransaction>> getTransactions();
 }
 
-/// Mock data; replace with your API / local DB.
+/// Reads the plan and transactions saved during onboarding.
 class HomeDataSourceImpl implements HomeDataSource {
-  @override
-  Future<BudgetSummary> getSummary() async {
-    await Future<void>.delayed(const Duration(milliseconds: 1400));
-    return const BudgetSummary(
-      balance: 4820.50,
+  const HomeDataSourceImpl(this._store);
+  final BudgetSetupLocalDataSource _store;
 
-      monthlyBudget: 2480,
-      spent: 1537.60,
-      recent: [
-        Transaction(title: 'Groceries', category: 'Food', amount: -86.40),
-        Transaction(title: 'Salary', category: 'Income', amount: 3200),
-        Transaction(title: 'Metro card', category: 'Transport', amount: -25),
-        Transaction(title: 'Coffee', category: 'Food', amount: -4.80),
-      ],
-    );
+  @override
+  Future<BudgetPlan> getBudgetPlan() => _store.getBudgetPlan();
+
+  @override
+  Future<List<NewTransaction>> getTransactions() async {
+    // Simulated latency so the shimmer skeleton is visible.
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    return _store.getTransactions();
   }
 }

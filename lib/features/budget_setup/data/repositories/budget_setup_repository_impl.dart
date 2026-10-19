@@ -1,6 +1,6 @@
 import '../../../../core/error/failures.dart';
 import '../../../../core/utils/result.dart';
-import '../../domain/entities/budget_cycle.dart';
+import '../../domain/entities/budget_plan.dart';
 import '../../domain/entities/new_transaction.dart';
 import '../../domain/entities/transaction_category.dart';
 import '../../domain/repositories/budget_setup_repository.dart';
@@ -11,9 +11,9 @@ class BudgetSetupRepositoryImpl implements BudgetSetupRepository {
   final BudgetSetupLocalDataSource _local;
 
   @override
-  Future<Result<void>> saveBudgetCycle(BudgetCycle cycle) async {
+  Future<Result<void>> saveBudgetPlan(BudgetPlan plan) async {
     try {
-      await _local.saveBudgetCycle(cycle);
+      await _local.saveBudgetPlan(plan);
       return const Ok<void>(null);
     } catch (_) {
       return const Err<void>(CacheFailure('Could not save your budget cycle.'));
