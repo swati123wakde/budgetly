@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/utils/validators.dart';
@@ -61,8 +62,9 @@ class LoginCubit extends Cubit<LoginState> {
     if (isClosed) return;
     result.fold(
           (failure) => emit(state.copyWith(
-        status: LoginStatus.failure,
-        errorMessage: () => failure.message,
+        // Closing the Google picker isn't an error, so go back to idle quietly.
+        status: failure is CancelledFailure ? LoginStatus.idle : LoginStatus.failure,
+        errorMessage: () => failure is CancelledFailure ? null : failure.message,
       )),
           (user) => emit(state.copyWith(status: LoginStatus.success, user: user)),
     );

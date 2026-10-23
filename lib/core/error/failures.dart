@@ -20,3 +20,8 @@ class AuthFailure extends Failure {
 class CacheFailure extends Failure {
   const CacheFailure([super.message = 'Could not load local data.']);
 }
+
+/// The user backed out of a flow on purpose. Not an error: don't show a message.
+class CancelledFailure extends Failure {
+  const CancelledFailure([super.message = 'Cancelled.']);
+}
