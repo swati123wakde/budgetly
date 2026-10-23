@@ -13,3 +13,8 @@ class CacheException implements Exception {
   const CacheException([this.message]);
   final String? message;
 }
+
+/// Thrown when the user closes a sign-in flow (e.g. the Google account picker).
+class CancelledException implements Exception {
+  const CancelledException();
+}

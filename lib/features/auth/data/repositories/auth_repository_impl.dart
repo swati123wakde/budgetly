@@ -23,6 +23,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<UserEntity>> _guard(Future<UserEntity> Function() call) async {
     try {
       return Ok<UserEntity>(await call());
+    } on CancelledException {
+      return const Err<UserEntity>(CancelledFailure());
     } on AuthException catch (e) {
       return Err<UserEntity>(AuthFailure(e.message ?? 'Invalid email or password.'));
     } on ServerException catch (e) {

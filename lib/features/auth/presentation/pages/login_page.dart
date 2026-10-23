@@ -117,24 +117,24 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.lg),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(AppStrings.noAccount, style: AppTextStyles.bodyMedium),
-                      TextButton(
-                        onPressed: () =>
-                            Navigator.of(context).pushReplacementNamed(AppRoutes.getStarted),
-                        child: Text(
-                          AppStrings.signUp,
-                          style: AppTextStyles.label.copyWith(
-                            color: AppColors.matteRedLight,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text(AppStrings.noAccount, style: AppTextStyles.bodyMedium),
+                  //     TextButton(
+                  //       onPressed: () =>
+                  //           Navigator.of(context).pushReplacementNamed(AppRoutes.getStarted),
+                  //       child: Text(
+                  //         AppStrings.signUp,
+                  //         style: AppTextStyles.label.copyWith(
+                  //           color: AppColors.matteRedLight,
+                  //           fontWeight: FontWeight.w600,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: AppSpacing.lg),
                 ],
               ),
             ),
