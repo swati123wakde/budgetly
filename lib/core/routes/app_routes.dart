@@ -12,4 +12,5 @@ abstract final class AppRoutes {
   static const String allExpenses = '/all-expenses';
   static const String profile = '/profile';
   static const String register = '/register';
+  static const String addTransaction = '/add-transaction';
 }

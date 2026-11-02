@@ -15,6 +15,7 @@ import '../../features/budget_setup/data/repositories/budget_setup_repository_im
 import '../../features/budget_setup/domain/repositories/budget_setup_repository.dart';
 import '../../features/budget_setup/domain/usecases/create_category.dart';
 import '../../features/budget_setup/domain/usecases/get_categories.dart';
+import '../../features/budget_setup/domain/usecases/get_transactions.dart';
 import '../../features/budget_setup/domain/entities/budget_cycle.dart';
 import '../../features/budget_setup/domain/usecases/save_budget_plan.dart';
 import '../../features/budget_setup/domain/usecases/save_transaction.dart';
@@ -38,6 +39,8 @@ import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/domain/usecases/get_profile_summary.dart';
 import '../../features/profile/presentation/cubit/profile_cubit.dart';
 import '../../features/splash/presentation/cubit/splash_cubit.dart';
+import '../../features/timeline/presentation/cubit/add_transaction_cubit.dart';
+import '../../features/timeline/presentation/cubit/timeline_cubit.dart';
 
 /// Service locator.
 final GetIt sl = GetIt.instance;
@@ -80,6 +83,7 @@ Future<void> initDependencies() async {
     ..registerLazySingleton(() => GetCategories(sl()))
     ..registerLazySingleton(() => CreateCategory(sl()))
     ..registerLazySingleton(() => SaveTransaction(sl()))
+    ..registerLazySingleton(() => GetTransactions(sl()))
     ..registerFactory(() => BudgetCycleCubit(sl()))
     ..registerFactoryParam<PaydayCubit, BudgetCycle, void>(
           (cycle, _) => PaydayCubit(sl(), cycle: cycle),
@@ -95,6 +99,13 @@ Future<void> initDependencies() async {
     ..registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(sl()))
     ..registerLazySingleton(() => GetHomeOverview(sl()))
     ..registerFactory(() => HomeCubit(sl()));
+
+  // ---------- Timeline ----------
+  sl
+    ..registerFactory(() => TimelineCubit(sl()))
+    ..registerFactory(
+          () => AddTransactionCubit(saveTransaction: sl(), getTransactions: sl()),
+    );
 
   // ---------- Profile ----------
   sl

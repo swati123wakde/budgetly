@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimens.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/date_span.dart';
+import '../../../timeline/presentation/cubit/add_transaction_cubit.dart';
+import '../../../timeline/presentation/cubit/timeline_cubit.dart';
+import '../../../timeline/presentation/pages/add_transaction_page.dart';
+import '../../../timeline/presentation/pages/timeline_tab.dart';
 import '../../domain/entites/home_overview.dart';
 import '../cubit/home_cubit.dart';
 import '../widgets/challenge_card.dart';
@@ -16,9 +21,10 @@ import '../widgets/forecast_card.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_shimmer.dart';
 import '../widgets/period_label.dart';
+import '../widgets/range_calendar_dialog.dart';
 import 'all_expenses_page.dart';
 
-/// Main screen after onboarding: Home tab plus three placeholder tabs.
+/// Main screen after onboarding: Home, Timeline (calendar) and two placeholder tabs.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -28,6 +34,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _tab = 0;
+
+  /// Lives as long as the home screen so the Timeline tab keeps its data.
+  late final TimelineCubit _timelineCubit = sl<TimelineCubit>()..load();
+
+  @override
+  void dispose() {
+    _timelineCubit.close();
+    super.dispose();
+  }
+
+  /// Opens "Add transaction"; refreshes Home and Timeline once something is saved.
+  Future<void> _addTransaction() async {
+    final homeCubit = context.read<HomeCubit>();
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => BlocProvider(
+          create: (_) => sl<AddTransactionCubit>()..init(),
+          child: const AddTransactionPage(),
+        ),
+      ),
+    );
+    if (saved == true) {
+      await Future.wait([homeCubit.load(), _timelineCubit.load()]);
+    }
+  }
 
   static const _destinations = [
     (Icons.home_outlined, Icons.home_rounded, AppStrings.tabHome),
@@ -45,11 +76,12 @@ class _HomePageState extends State<HomePage> {
           index: _tab,
           children: [
             const _HomeTab(),
-            for (final d in _destinations.skip(1)) _ComingSoonTab(icon: d.$2, title: d.$3),
+            BlocProvider.value(value: _timelineCubit, child: const TimelineTab()),
+            for (final d in _destinations.skip(2)) _ComingSoonTab(icon: d.$2, title: d.$3),
           ],
         ),
       ),
-      floatingActionButton: _tab == 0 ? const _AddButton() : null,
+      floatingActionButton: _tab <= 1 ? _AddButton(onPressed: _addTransaction) : null,
       bottomNavigationBar: DecoratedBox(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AppColors.border)),
@@ -89,14 +121,16 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/// The "+" button is shown but not wired up yet.
+/// The "+" button on Home and Timeline — opens "Add transaction".
 class _AddButton extends StatelessWidget {
-  const _AddButton();
+  const _AddButton({required this.onPressed});
+
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      onPressed: null,
+      onPressed: onPressed,
       backgroundColor: AppColors.matteRed,
       foregroundColor: AppColors.onRed,
       elevation: 0,
@@ -113,15 +147,13 @@ class _HomeTab extends StatelessWidget {
   Future<void> _pickRange(BuildContext context, DateSpan current) async {
     final cubit = context.read<HomeCubit>();
     final today = dateOnly(DateTime.now());
-    final picked = await showDateRangePicker(
+    final picked = await showRangeCalendarDialog(
       context: context,
+      initialRange: current,
       firstDate: DateTime(today.year - 2),
       lastDate: DateTime(today.year + 1, 12, 31),
-      initialDateRange: DateTimeRange(start: current.start, end: current.end),
-      helpText: AppStrings.rangePickerHelp,
-      saveText: AppStrings.apply,
     );
-    if (picked != null) await cubit.selectRange(DateSpan(picked.start, picked.end));
+    if (picked != null && picked != current) await cubit.selectRange(picked);
   }
 
   @override

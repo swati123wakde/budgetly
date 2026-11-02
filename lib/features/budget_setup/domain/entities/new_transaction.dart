@@ -11,6 +11,7 @@ class NewTransaction extends Equatable {
     required this.amount,
     required this.category,
     required this.date,
+    this.note,
   });
 
   final TransactionType type;
@@ -20,8 +21,11 @@ class NewTransaction extends Equatable {
   final TransactionCategory category;
   final DateTime date;
 
+  /// Optional free-text note the user typed.
+  final String? note;
+
   bool get isExpense => type == TransactionType.expense;
 
   @override
-  List<Object?> get props => [type, amount, category, date];
+  List<Object?> get props => [type, amount, category, date, note];
 }
