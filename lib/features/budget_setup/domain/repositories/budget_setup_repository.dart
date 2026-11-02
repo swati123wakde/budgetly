@@ -8,4 +8,5 @@ abstract interface class BudgetSetupRepository {
   Future<Result<List<TransactionCategory>>> getCategories();
   Future<Result<TransactionCategory>> createCategory(String name);
   Future<Result<void>> saveTransaction(NewTransaction transaction);
+  Future<Result<List<NewTransaction>>> getTransactions();
 }

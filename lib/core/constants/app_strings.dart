@@ -80,6 +80,20 @@ abstract final class AppStrings {
   static const String noExpensesYet = 'No expenses in this period yet.';
   static String transactionCount(int n) => n == 1 ? '1 transaction' : '$n transactions';
 
+  // Timeline
+  static const String timeline = 'Timeline';
+  static const String timelineBook = 'Default';
+  static const String bookBalance = 'Book Balance';
+  static const String pending = 'Pending';
+  static const String today = 'Today';
+  static const String yesterday = 'Yesterday';
+  static const String noTransactionsYet = 'No transactions yet.\nTap + to add one.';
+
+  // Add transaction
+  static const String addTransaction = 'Add transaction';
+  static const String notesOptional = 'Notes (optional)';
+  static const String transactionAdded = 'Transaction added';
+
   // All expenses
   static const String allExpenses = 'All expenses';
   static const String totalSpent = 'Total spent';

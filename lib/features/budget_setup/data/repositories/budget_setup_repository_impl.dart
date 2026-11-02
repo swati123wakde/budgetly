@@ -47,4 +47,13 @@ class BudgetSetupRepositoryImpl implements BudgetSetupRepository {
       return const Err<void>(CacheFailure('Could not save the transaction. Try again.'));
     }
   }
+
+  @override
+  Future<Result<List<NewTransaction>>> getTransactions() async {
+    try {
+      return Ok<List<NewTransaction>>(await _local.getTransactions());
+    } catch (_) {
+      return const Err<List<NewTransaction>>(CacheFailure('Could not load your transactions.'));
+    }
+  }
 }
